@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark" data-lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratório da Conjectura de Collatz / Collatz Conjecture Lab</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root[data-theme="dark"] {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --text-color: #c9d1d9;
+            --heading-color: #58a6ff;
+            --accent-color: #58a6ff;
+            --accent-purple: #d2a8ff;
+            --accent-red: #ff7b72;
+            --accent-green: #3fb950;
+            --accent-yellow: #e3b341;
+            --accent-blue: #42a5f5;
+            --border-color: #30363d;
+            --chart-text: #8b949e;
+            --chart-grid: #30363d;
+            --highlight-bg: #0d1117;
+            --btn-bg: #238636;
+            --btn-hover: #2ea043;
+        }
+
+        :root[data-theme="light"] {
+            --bg-color: #f6f8fa;
+            --panel-bg: #ffffff;
+            --text-color: #24292f;
+            --heading-color: #0969da;
+            --accent-color: #0969da;
+            --accent-purple: #8250df;
+            --accent-red: #cf222e;
+            --accent-green: #1a7f37;
+            --accent-yellow: #9a6700;
+            --accent-blue: #1565c0;
+            --border-color: #d0d7de;
+            --chart-text: #57606a;
+            --chart-grid: #e1e4e8;
+            --highlight-bg: #f6f8fa;
+            --btn-bg: #1f883d;
+            --btn-hover: #1a7f37;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: var(--heading-color);
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .toggle-btn {
+            background-color: var(--panel-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .toggle-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background-color: transparent;
+            color: var(--text-color);
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .tab-btn:hover {
+            background-color: var(--border-color);
+            opacity: 1;
+        }
+
+        .tab-btn.active {
+            background-color: var(--panel-bg);
+            color: var(--accent-color);
+            font-weight: 700;
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .tab-content {
+            display: none;
+            background-color: var(--panel-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background-color: var(--bg-color);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        input[type="number"], select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--panel-bg);
+            color: var(--text-color);
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        input[type="number"] { width: 140px; }
+        select { width: 200px; cursor: pointer; }
+
+        button.action-btn {
+            padding: 10px 24px;
+            background-color: var(--btn-bg);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        button.action-btn:hover { 
+            background-color: var(--btn-hover); 
+            transform: translateY(-1px);
+        }
+
+        .stats { display: flex; gap: 20px; margin-bottom: 20px; font-size: 14px; flex-wrap: wrap; }
+        .stat-box { background: var(--bg-color); padding: 15px 20px; border-radius: 10px; border: 1px solid var(--border-color); flex: 1; min-width: 150px; }
+        .stat-label { color: var(--chart-text); margin-bottom: 5px; font-weight: 500;}
+        .stat-value { color: var(--accent-color); font-weight: 700; font-size: 24px; }
+
+        .chart-container { position: relative; height: 65vh; width: 100%; }
+
+        .math-section h2, .home-section h2, #algoTab h2, #compareTab h2 { color: var(--heading-color); margin-top: 35px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; font-weight: 700;}
+        .math-section h3, .home-section h3, #algoTab h3 { color: var(--accent-purple); margin-top: 25px; font-weight: 600;}
+        .math-section p, .home-section p, #algoTab p, #compareTab p { text-align: justify; font-size: 1.05rem;}
+        
+        .highlight { 
+            background: var(--highlight-bg); 
+            padding: 20px; 
+            border-left: 5px solid var(--accent-color); 
+            border-radius: 0 8px 8px 0; 
+            margin: 25px 0; 
+            font-size: 1.05em; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        
+        .math-list, .home-list { margin-left: 20px; margin-bottom: 20px; font-size: 1.05rem;}
+        .math-list li, .home-list li { margin-bottom: 10px; }
+
+        /* ALGORITHM E COMPLEXITY CSS */
+        .code-block { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin: 15px 0; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.5; color: var(--text-color); }
+        .code-block code { color: var(--heading-color); }
+        .algorithm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .algorithm-card { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; transition: all 0.2s; }
+        .algorithm-card:hover { border-color: var(--accent-color); }
+        .algorithm-card h3 { margin-top: 0; display: flex; align-items: center; gap: 12px; }
+        .algorithm-badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; background: var(--accent-color); color: #fff; text-transform: uppercase; }
+        .algorithm-badge.iterative { background: var(--accent-green); }
+        .algorithm-badge.recursive { background: var(--accent-purple); }
+        
+        .complexity-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        .complexity-table th, .complexity-table td { padding: 14px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .complexity-table th { background-color: var(--bg-color); font-weight: 700; color: var(--accent-color); text-transform: uppercase; font-size: 12px; }
+        .complexity-table tr:hover { background-color: var(--highlight-bg); }
+        
+        .complexity-notation { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 20px 0; }
+        .complexity-item { background: var(--bg-color); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); transition: all 0.2s; }
+        .complexity-item h4 { margin: 0 0 12px 0; color: var(--accent-color); font-size: 13px; text-transform: uppercase; }
+        .complexity-item .formula { font-family: 'Courier New', monospace; background: var(--highlight-bg); padding: 10px; border-radius: 6px; margin: 10px 0; font-size: 13px; color: var(--heading-color); border: 1px solid var(--border-color); }
+        .complexity-item .description { font-size: 13px; color: var(--chart-text); line-height: 1.5; }
+        
+        .performance-chart { position: relative; height: 400px; margin-bottom: 20px; background: var(--bg-color); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; }
+        .list-item { margin-bottom: 12px; padding-left: 24px; position: relative; color: var(--text-color); font-size: 1.05rem; }
+        .list-item:before { content: "▸"; position: absolute; left: 0; color: var(--accent-color); font-weight: bold; font-size: 18px; }
+
+        /* STACK VISUALIZATION CSS */
+        .stack-visualization { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin: 20px 0; font-family: 'Courier New', monospace; font-size: 13px; }
+        .stack-title { color: var(--accent-color); font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 15px; }
+        .stack-container { display: flex; flex-direction: column-reverse; gap: 10px; max-height: 500px; overflow-y: auto; padding: 10px; border-radius: 8px; background: var(--highlight-bg); }
+        .stack-frame { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin: 0; animation: slideIn 0.3s ease-out; }
+        .stack-frame.current { border-color: var(--accent-color); background: var(--highlight-bg); box-shadow: 0 0 12px rgba(88, 166, 255, 0.1); border-width: 2px; }
+        .stack-frame.completed { opacity: 0.6; border-color: var(--accent-green); }
+        .stack-frame-header { color: var(--accent-color); font-weight: 700; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; }
+        .stack-frame-content { color: var(--chart-text); font-size: 12px; margin: 6px 0; line-height: 1.5; }
+        .stack-frame-content strong { color: var(--text-color); font-weight: 600; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .execution-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0; }
+        .execution-info-item { background: var(--highlight-bg); padding: 12px; border-radius: 8px; border-left: 3px solid var(--accent-color); border: 1px solid var(--border-color); }
+        .execution-info-label { font-size: 11px; color: var(--chart-text); text-transform: uppercase; font-weight: 600; }
+        .execution-info-value { font-size: 20px; font-weight: 700; color: var(--accent-color); margin-top: 4px; }
+
+        /* FOOTER STYLES */
+        footer { background: var(--panel-bg); border-top: 1px solid var(--border-color); padding: 30px 20px; margin-top: 40px; text-align: center; color: var(--chart-text); font-size: 13px; }
+        footer a { color: var(--accent-color); text-decoration: none; font-weight: 600; transition: all 0.2s; }
+        footer a:hover { text-decoration: underline; color: var(--heading-color); }
+        .footer-content { max-width: 1300px; margin: 0 auto; }
+        .footer-links { margin: 12px 0; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .footer-copyright { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-color); color: var(--chart-text); }
+
+        /* Language Toggle Classes */
+        [data-lang="en"] .lang-pt { display: none !important; }
+        [data-lang="pt"] .lang-en { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="top-bar">
+                <h1>
+                    <span class="lang-pt">Laboratório da Conjectura de Collatz</span>
+                    <span class="lang-en">Collatz Conjecture Laboratory</span>
+                </h1>
+                <div class="toggle-group">
+                    <button class="toggle-btn" id="themeToggle" onclick="toggleTheme()">
+                        ☀️ <span class="lang-pt">Claro</span><span class="lang-en">Light</span>
+                    </button>
+                    <button class="toggle-btn" id="langToggle" onclick="toggleLang()">
+                        🌐 EN
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab('homeTab', this)">
+                    <span class="lang-pt">Início</span><span class="lang-en">Home</span>
+                </button>
+                <button class="tab-btn" onclick="openTab('visTab', this)">
+                    <span class="lang-pt">Órbita Única</span><span class="lang-en">Single Orbit</span>
+                </button>
+                <button class="tab-btn" onclick="openTab('stopTab', this)">
+                    <span class="lang-pt">Distribuição de Parada</span><span class="lang-en">Stopping Distribution</span>
+                </button>
+                <button class="tab-btn" onclick="openTab('mapTab', this)">
+                    <span class="lang-pt">Espaço de Fase</span><span class="lang-en">Phase Space</span>
+                </button>
+                <button class="tab-btn" onclick="openTab('compareTab', this)">
+                    <span class="lang-pt">Divergência: $2^n$ vs $3n+1$</span><span class="lang-en">Divergence: $2^n$ vs $3n+1$</span>
+                </button>
+                <button class="tab-btn" onclick="openTab('algoTab', this)">
+                    <span class="lang-pt">Algoritmos & Complexidade</span><span class="lang-en">Algorithms & Complexity</span>
+                </button>
+                <button class="tab-btn" onclick="openTab('mathTab', this)">
+                    <span class="lang-pt">Matemática & Provas</span><span class="lang-en">Math & Proofs</span>
+                </button>
+            </div>
+
+            <div id="homeTab" class="tab-content active home-section">
+                <div class="lang-pt">
+                    <h2>O Enigma Mais Perigoso da Matemática</h2>
+                    <p>A Conjectura de Collatz, também conhecida como o problema $3n+1$, é um dos mistérios mais famosos e fascinantes da matemática moderna. Proposta pelo matemático alemão Lothar Collatz em 1937, ela se baseia em uma regra incrivelmente simples, tão fácil que uma criança pode operá-la, mas tão formidavelmente complexa que os maiores gênios da humanidade ainda não conseguiram prová-la.</p>
+                    
+                    <div class="highlight" style="border-left-color: var(--accent-yellow);">
+                        <strong>💡 Curiosidade Computacional:</strong> Até o momento, projetos de supercomputação já testaram e confirmaram a conjectura para todos os números inteiros até <strong>$2^{68}$</strong> (aproximadamente $2,95 \times 10^{20}$, ou 295 quintilhões). Nenhum contraexemplo foi encontrado nessa vasta imensidão de números, todos eles eventualmente retornam para $1$!
+                    </div>
+
+                    <h3>A Regra do Jogo</h3>
+                    <p>Escolha qualquer número inteiro positivo. Em seguida, aplique as seguintes regras recursivamente:</p>
+                    <ul class="home-list">
+                        <li>Se o número for <strong>par</strong>, divida-o por $2$.</li>
+                        <li>Se o número for <strong>ímpar</strong>, multiplique por $3$ e some $1$.</li>
+                    </ul>
+                    <p>Ou seja: $f(n) = \begin{cases} n/2 & \text{se } n \text{ é par} \\ 3n+1 & \text{se } n \text{ é ímpar} \end{cases}$</p>
+                    <p>A conjectura afirma que, independentemente do número gigantesco com o qual você comece, a sequência (ou "órbita") <strong>sempre</strong> alcançará o número $1$, caindo inevitavelmente no ciclo trivial fechado: $4 \to 2 \to 1$.</p>
+
+                    <h3>Por que isso é tão importante?</h3>
+                    <p>O lendário matemático Paul Erdős certa vez declarou sobre este problema: <em>"A matemática pode não estar pronta para tais problemas."</em> A Conjectura de Collatz não é apenas um truque numérico; ela toca no cerne estrutural da <strong>Teoria dos Números</strong>, do comportamento não-linear de <strong>Sistemas Dinâmicos</strong> e da <strong>Irredutibilidade Computacional</strong>.</p>
+                    <p>Ela demonstra de forma brilhante como regras estritamente determinísticas podem gerar comportamentos pseudoaleatórios e profundamente caóticos. Resolver esse problema exigiria o desenvolvimento de ferramentas matemáticas inteiramente novas, capazes de decodificar a interação obscura entre as propriedades aditivas (somar 1) e multiplicativas (fatoração de primos) dos números inteiros.</p>
+
+                    <h3>O Propósito desta Aplicação</h3>
+                    <p>Este laboratório digital interativo foi construído para investigar a anatomia geométrica, algébrica e visual da conjectura. Através das abas no menu superior, exploraremos os limites computacionais deste enigma:</p>
+                    <ul class="home-list">
+                        <li><strong>Órbita Única:</strong> Visualize o trajeto caótico de sobe-e-desce de números individuais até atingirem a base.</li>
+                        <li><strong>Distribuição de Parada:</strong> Analise a macroestrutura do "Tempo de Parada" de milhares de órbitas, revelando padrões belíssimos em formas de "nuvens" e "fios".</li>
+                        <li><strong>Espaço de Fase:</strong> Entenda o sistema vetorial e as fronteiras logarítmicas que governam a expansão e a contração dos números à medida que tendem ao infinito.</li>
+                        <li><strong>Divergência $2^n$ vs $3n+1$:</strong> Observe a assimetria brutal de poder entre as operações matemáticas em disputa no sistema.</li>
+                        <li><strong>Algoritmos & Complexidade:</strong> Estude a anatomia algorítmica por trás da avaliação, analisando profundidade de pilha recursiva e eficiência iterativa.</li>
+                        <li><strong>Matemática & Provas:</strong> Mergulhe na documentação rigorosa do raciocínio algébrico, na dedução de equações para múltiplos passos aninhados e nas provas de por que os métodos tradicionais falham.</li>
+                    </ul>
+                </div>
+                
+                <div class="lang-en">
+                    <h2>The Most Dangerous Enigma in Mathematics</h2>
+                    <p>The Collatz Conjecture, also known as the $3n+1$ problem, is one of the most famous and fascinating mysteries in modern mathematics. Proposed by German mathematician Lothar Collatz in 1937, it is based on an incredibly simple rule—so easy a child could compute it—yet so formidably complex that humanity's greatest geniuses have yet to prove it.</p>
+                    
+                    <div class="highlight" style="border-left-color: var(--accent-yellow);">
+                        <strong>💡 Computational Curiosity:</strong> To date, supercomputing projects have tested and verified the conjecture for all integers up to <strong>$2^{68}$</strong> (approximately $2.95 \times 10^{20}$, or 295 quintillion). Not a single counterexample has been found in this vast ocean of numbers; they all eventually drop back to $1$!
+                    </div>
+
+                    <h3>The Rule of the Game</h3>
+                    <p>Choose any positive integer. Then, apply the following rules recursively:</p>
+                    <ul class="home-list">
+                        <li>If the number is <strong>even</strong>, divide it by $2$.</li>
+                        <li>If the number is <strong>odd</strong>, multiply it by $3$ and add $1$.</li>
+                    </ul>
+                    <p>That is: $f(n) = \begin{cases} n/2 & \text{if } n \text{ is even} \\ 3n+1 & \text{if } n \text{ is odd} \end{cases}$</p>
+                    <p>The conjecture asserts that, regardless of the gigantic number you start with, the sequence (or "orbit") will <strong>always</strong> reach the number $1$, inevitably falling into the closed trivial cycle: $4 \to 2 \to 1$.</p>
+
+                    <h3>Why is this so important?</h3>
+                    <p>The legendary mathematician Paul Erdős once declared about this problem: <em>"Mathematics may not be ready for such problems."</em> The Collatz Conjecture is not just a numerical parlor trick; it touches the structural core of <strong>Number Theory</strong>, the nonlinear behavior of <strong>Dynamical Systems</strong>, and <strong>Computational Irreducibility</strong>.</p>
+                    <p>It brilliantly demonstrates how strictly deterministic rules can generate deeply chaotic, pseudo-random behavior. Solving this problem would require developing entirely new mathematical tools capable of decoding the obscure interaction between the additive (adding 1) and multiplicative (prime factorization) properties of integers.</p>
+
+                    <h3>The Purpose of this Application</h3>
+                    <p>This interactive digital laboratory was built to investigate the geometric, algebraic, and visual anatomy of the conjecture. Through the tabs in the top menu, we will explore the computational boundaries of this enigma:</p>
+                    <ul class="home-list">
+                        <li><strong>Single Orbit:</strong> Visualize the chaotic up-and-down trajectory of individual numbers until they hit the base.</li>
+                        <li><strong>Stopping Distribution:</strong> Analyze the macrostructure of the "Stopping Time" for thousands of orbits, revealing beautiful patterns in the form of "clouds" and "threads".</li>
+                        <li><strong>Phase Space:</strong> Understand the vector system and logarithmic boundaries that govern the expansion and contraction of numbers as they tend to infinity.</li>
+                        <li><strong>Divergence $2^n$ vs $3n+1$:</strong> Observe the brutal power asymmetry between the mathematical operations competing in the system.</li>
+                        <li><strong>Algorithms & Complexity:</strong> Study the algorithmic anatomy behind the evaluation, analyzing recursive stack depth and iterative efficiency.</li>
+                        <li><strong>Math & Proofs:</strong> Dive into the rigorous documentation of algebraic reasoning, the derivation of equations for nested multiple steps, and proofs of why traditional methods fail.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="visTab" class="tab-content">
+                <div class="controls">
+                    <label for="seedInput">
+                        <span class="lang-pt">Número Inicial ($n$):</span>
+                        <span class="lang-en">Starting Number ($n$):</span>
+                    </label>
+                    <input type="number" id="seedInput" value="27" min="1">
+                    <button class="action-btn" onclick="plotCollatz()">
+                        <span class="lang-pt">Gerar Trajetória</span>
+                        <span class="lang-en">Generate Trajectory</span>
+                    </button>
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-label">
+                            <span class="lang-pt">Passos até o ciclo:</span>
+                            <span class="lang-en">Steps to cycle:</span>
+                        </div>
+                        <div id="statSteps" class="stat-value">111</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">
+                            <span class="lang-pt">Valor Máximo Atingido:</span>
+                            <span class="lang-en">Peak Value Reached:</span>
+                        </div>
+                        <div id="statMax" class="stat-value">9232</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="collatzChart"></canvas></div>
+            </div>
+
+            <div id="stopTab" class="tab-content">
+                <div class="controls">
+                    <label for="maxNInput">
+                        <span class="lang-pt">Analisar de $n = 1$ até:</span>
+                        <span class="lang-en">Analyze from $n = 1$ to:</span>
+                    </label>
+                    <select id="maxNInput">
+                        <option value="5000">n = 5.000</option>
+                        <option value="10000" selected>n = 10.000</option>
+                        <option value="50000">n = 50.000</option>
+                        <option value="100000">n = 100.000</option>
+                    </select>
+                    <button class="action-btn" onclick="plotStoppingTimes()">
+                        <span class="lang-pt">Gerar Mar de Collatz</span>
+                        <span class="lang-en">Generate Collatz Sea</span>
+                    </button>
+                </div>
+                <div class="chart-container"><canvas id="stoppingTimesChart"></canvas></div>
+            </div>
+
+            <div id="mapTab" class="tab-content">
+                <div class="controls">
+                    <label for="mapRangeInput">
+                        <span class="lang-pt">Escala de Análise:</span>
+                        <span class="lang-en">Analysis Scale:</span>
+                    </label>
+                    <select id="mapRangeInput">
+                        <option value="4" class="lang-pt">Até 10.000 ($10^4$)</option>
+                        <option value="4" class="lang-en">Up to 10,000 ($10^4$)</option>
+                        <option value="5" class="lang-pt">Até 100.000 ($10^5$)</option>
+                        <option value="5" class="lang-en">Up to 100,000 ($10^5$)</option>
+                        <option value="6" selected class="lang-pt">Até 1.000.000 ($10^6$)</option>
+                        <option value="6" selected class="lang-en">Up to 1,000,000 ($10^6$)</option>
+                        <option value="7" class="lang-pt">Até 10.000.000 ($10^7$)</option>
+                        <option value="7" class="lang-en">Up to 10,000,000 ($10^7$)</option>
+                    </select>
+                    <button class="action-btn" onclick="plotPhaseSpace()">
+                        <span class="lang-pt">Gerar Espaço de Fase</span>
+                        <span class="lang-en">Generate Phase Space</span>
+                    </button>
+                </div>
+                <div class="chart-container"><canvas id="phaseSpaceChart"></canvas></div>
+            </div>
+
+            <div id="compareTab" class="tab-content">
+                <div class="lang-pt" style="margin-bottom: 25px;">
+                    <h2>A Batalha das Forças: Crescimento vs Colapso</h2>
+                    <p>Este gráfico em escala logarítmica ilustra a assimetria de poder entre as operações da conjectura. Ao analisar as linhas, perceba como a força bruta de "combos" de divisão oblitera o crescimento ímpar:</p>
+                    <ul class="math-list" style="font-size: 0.95rem;">
+                        <li><strong style="color: var(--accent-red);">A Força da Multiplicação ($3n+1$):</strong> Causa um crescimento linear agudo.</li>
+                        <li><strong style="color: var(--accent-purple);">O Passo Acelerado ($(3n+1)/2$):</strong> Como todo número ímpar gera um número par, a multiplicação é <em>sempre</em> seguida de pelo menos uma divisão, resultando num crescimento real de $\approx 1.5x$.</li>
+                        <li><strong style="color: var(--accent-blue);">A Divisão Única ($n/2$):</strong> O efeito isolado de reduzir o número pela metade apenas uma vez.</li>
+                        <li><strong style="color: var(--accent-yellow);">O Combo Exponencial ($2^n$):</strong> O segredo de Collatz. O poder de quedas consecutivas cresce exponencialmente. Uma sequência ininterrupta de divisões domina completamente qualquer pico gerado.</li>
+                    </ul>
+                    <p style="font-size: 0.85rem; color: var(--chart-text); text-align: center; margin-bottom: 5px;">
+                        💡 <strong>Dica de Interação:</strong> Clique nos nomes dentro da legenda do gráfico abaixo para mostrar ou ocultar linhas específicas.
+                    </p>
+                </div>
+                <div class="lang-en" style="margin-bottom: 25px;">
+                    <h2>The Battle of Forces: Growth vs Collapse</h2>
+                    <p>This logarithmic chart illustrates the power asymmetry between the operations. Notice how the brute force of division "combos" obliterates the odd growth:</p>
+                    <ul class="math-list" style="font-size: 0.95rem;">
+                        <li><strong style="color: var(--accent-red);">Power of Multiplication ($3n+1$):</strong> Causes sharp linear growth.</li>
+                        <li><strong style="color: var(--accent-purple);">The Accelerated Step ($(3n+1)/2$):</strong> Since every odd number generates an even one, multiplication is <em>always</em> followed by at least one division, resulting in an actual growth of $\approx 1.5x$.</li>
+                        <li><strong style="color: var(--accent-blue);">Single Division ($n/2$):</strong> The isolated effect of halving the number exactly once.</li>
+                        <li><strong style="color: var(--accent-yellow);">The Exponential Combo ($2^n$):</strong> The secret of Collatz. The power of consecutive drops grows exponentially. An uninterrupted sequence of divisions completely dominates any generated peak.</li>
+                    </ul>
+                    <p style="font-size: 0.85rem; color: var(--chart-text); text-align: center; margin-bottom: 5px;">
+                        💡 <strong>Interaction Tip:</strong> Click on the names inside the chart legend below to show or hide specific lines.
+                    </p>
+                </div>
+
+                <div class="controls">
+                    <label for="compareNInput">
+                        <span class="lang-pt">Valor Máximo de $n$:</span>
+                        <span class="lang-en">Max Value of $n$:</span>
+                    </label>
+                    <input type="number" id="compareNInput" value="50" min="5" max="1024">
+                    <button class="action-btn" onclick="plotComparison()">
+                        <span class="lang-pt">Gerar Comparação</span>
+                        <span class="lang-en">Generate Comparison</span>
+                    </button>
+                </div>
+                <div class="chart-container"><canvas id="compareChart"></canvas></div>
+            </div>
+
+            <div id="algoTab" class="tab-content">
+                <div class="lang-pt">
+                    <h2>Análise de Complexidade Computacional</h2>
+                    <p>A Conjectura de Collatz desafia as noções tradicionais de análise de algoritmos. Ao contrário de uma busca binária ou de um loop com limites predefinidos, a função de Collatz não possui uma fórmula fechada que delimite os passos exatos para um dado $n$. Qualquer métrica sobre o seu "tempo de parada" repousa inteiramente sobre estimativas heurísticas e observações estatísticas de trilhões de órbitas confirmadas empíricamente.</p>
+
+                    <p>Abaixo apresentamos duas abordagens clássicas para avaliar as órbitas programaticamente, demonstrando vantagens e armadilhas ao lidar com números caóticos e as nuances do controle de fluxo de execução na memória do computador.</p>
+
+                    <div class="algorithm-grid">
+                        <div class="algorithm-card">
+                            <h3>
+                                <span class="algorithm-badge iterative">Iterativa</span>
+                                Loop (Laço de Repetição)
+                            </h3>
+                            <div class="code-block">
+<code>function collatzIterative(n) {
+  let steps = 0;
+  while (n !== 1) {
+    if (n % 2 === 0) {
+      n = n / 2;
+    } else {
+      n = 3 * n + 1;
+    }
+    steps++;
+  }
+  return steps;
+}</code>
+                            </div>
+                            <h4 style="color: var(--accent-green);">Vantagens:</h4>
+                            <div class="list-item"><strong>Espaço Constante $\mathcal{O}(1)$:</strong> Usa apenas a memória para as variáveis `n` e `steps`.</div>
+                            <div class="list-item"><strong>Estabilidade Total:</strong> Nunca causará o erro de <em>Stack Overflow</em> (estouro de pilha), não importa a altura da órbita.</div>
+                            <div class="list-item"><strong>Maior Velocidade Bruta:</strong> Evita o custo indireto associado com a criação repetida e destruição de frames de execução no processador.</div>
+                        </div>
+
+                        <div class="algorithm-card">
+                            <h3>
+                                <span class="algorithm-badge recursive">Recursiva</span>
+                                Chamadas Aninhadas
+                            </h3>
+                            <div class="code-block">
+<code>function collatzRecursive(n, steps = 0) {
+  if (n === 1) return steps;
+  
+  if (n % 2 === 0) {
+    return collatzRecursive(n / 2, steps + 1);
+  } else {
+    return collatzRecursive(3 * n + 1, steps + 1);
+  }
+}</code>
+                            </div>
+                            <h4 style="color: var(--accent-purple);">Desvantagens:</h4>
+                            <div class="list-item"><strong>Espaço Linear $\mathcal{O}(k)$:</strong> Usa espaço proporcional ao número total de passos ($k$), salvando o estado para cada passo em um "Frame" da pilha de execução.</div>
+                            <div class="list-item"><strong>Vulnerabilidade a Overflow:</strong> Se a órbita exigir muitos passos (ex: testar n=837799 ou além), o motor JS pode esgotar a profundidade máxima permitida da pilha e quebrar sua aplicação.</div>
+                        </div>
+                    </div>
+
+                    <h2>O Comportamento Assintótico Esperado</h2>
+                    <p>Por que dizemos que o comportamento médio se aproxima de $\mathcal{O}(\log n)$? O segredo está na probabilidade. Para um número par genérico $n$, a operação reduz seu valor para a metade (fator de redução de $0.5$). Para um número ímpar $n$, a operação $\frac{3n+1}{2}$ aumenta seu valor (crescimento aproximado de $1.5$ vezes). Na vastidão dos números inteiros, a frequência estatística com a qual as operações pares ocorrem em sucessão domina as explosões das operações ímpares, resultando em uma tendência macro de decaimento logarítmico na direção de $1$.</p>
+
+                    <div class="complexity-notation">
+                        <div class="complexity-item">
+                            <h4>🔴 Melhor Caso ($\Omega$)</h4>
+                            <p class="description">Limite inferior teórico do tempo de execução do algoritmo.</p>
+                            <div class="formula">$\Omega(\log n)$</div>
+                            <p class="description">Ocorre sempre que o sistema recebe potências puras de base 2 (ex: 16, 32, 1024...). A descida é imediata e sem atritos ímpares.</p>
+                        </div>
+
+                        <div class="complexity-item">
+                            <h4>🟢 Caso Médio ($\Theta$)</h4>
+                            <p class="description">O comportamento probabilístico e o "peso central" de tempos de parada.</p>
+                            <div class="formula">$\Theta(\log n)$</div>
+                            <p class="description">Confirmado através de bilhões de pontos computacionais amostrados; reflete a vitória probabilística das divisões sobre as multiplicações.</p>
+                        </div>
+
+                        <div class="complexity-item">
+                            <h4>🔵 Pior Caso Empírico (Observado)</h4>
+                            <p class="description">O limite superior baseado no que a humanidade já conseguiu calcular na prática.</p>
+                            <div class="formula">$\approx \mathcal{O}(\log n)$*</div>
+                            <p class="description">
+                                <em>*Nota matemática: O uso do Big-O aqui descreve uma aproximação empírica.</em><br><br>
+                                <strong>O Paradoxo do Pior Caso:</strong> Matematicamente, o verdadeiro Pior Caso ($\mathcal{O}$) é estritamente <strong>Desconhecido</strong>. Como não há prova absoluta da conjectura, a teoria admite a possibilidade de que o limite superior seja o infinito (se um número nunca parar de crescer). 
+                                <br><br>
+                                <strong>Na Prática Computacional:</strong> O cenário é bem diferente. Computacionalmente falando, até números que sobem violentamente (os chamados <em>outliers</em>) acabam caindo em um limite prático. Empiricamente, o tempo de parada máximo conhecido para números gigantescos cresce de forma escalonada, acompanhando um comportamento aproximadamente logarítmico, que inevitavelmente colapsa graças ao poder exponencial de reduções em cadeia ($2^n$).
+                            </p>
+                        </div>
+                    </div>
+
+                    <h2>Comparativo Arquitetural</h2>
+                    <table class="complexity-table">
+                        <thead>
+                            <tr>
+                                <th>Métrica</th>
+                                <th>Abordagem Iterativa (Loop)</th>
+                                <th>Abordagem Recursiva (Call Stack)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Melhor Caso ($\Omega$)</strong></td>
+                                <td>$\Omega(\log n)$</td>
+                                <td>$\Omega(\log n)$</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Caso Médio ($\Theta$)</strong></td>
+                                <td>$\Theta(\log n)$</td>
+                                <td>$\Theta(\log n)$</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pior Caso Teórico ($\mathcal{O}$)</strong></td>
+                                <td>Desconhecido</td>
+                                <td>Desconhecido</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Custo Espacial (Memória)</strong></td>
+                                <td>$\mathcal{O}(1)$ (Constante)</td>
+                                <td>$\mathcal{O}(k)$ (Linear por frame da órbita)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Limite Prático (Engine JS)</strong></td>
+                                <td>Infinito (até estourar os bytes numéricos)</td>
+                                <td>~10.000 chamadas (Stack Overflow)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Overhead de Execução</strong></td>
+                                <td>Baixíssimo (apenas reatribuição de variáveis)</td>
+                                <td>Alto (alocação e desconstrução de frames)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Teste de Performance ao Vivo</h2>
+                    <p>Compare as duas abordagens testando-as no seu navegador em tempo real:</p>
+                    <div class="controls">
+                        <input type="number" id="algoTestInput" placeholder="Número para testar" value="837799" min="1" max="10000000">
+                        <button class="action-btn" onclick="testAlgorithms()">
+                            <span class="lang-pt">Executar Teste de Estresse</span>
+                        </button>
+                    </div>
+                    <div class="stats" id="algoTestStats"></div>
+
+                    <h2>Visualização da Pilha Call Stack (Recursividade)</h2>
+                    <p>Ao rodar a função de forma recursiva, o computador vai empilhando ("stacking") ambientes de execução isolados na memória. Veja em detalhes a anatomia da criação da pilha para cada passo da trajetória de um número (experimente com valores muito altos para visualizar a sobrecarga!):</p>
+                    <div class="controls">
+                        <input type="number" id="stackTestInput" placeholder="Número" value="15" min="1" max="10000">
+                        <button class="action-btn" onclick="visualizeStack()">
+                            Gerar e Visualizar a Pilha
+                        </button>
+                    </div>
+                    <div id="stackVisualization"></div>
+
+                    <h2>Curva de Performance Estática: Limitação e Sobrecarga de Pilhas</h2>
+                    <p>O gráfico abaixo exibe os tempos médios ilustrativos simulados para conjuntos de dados massivos, demonstrando como a aproximação Iterativa garante finalizações uniformes, enquanto a Recursiva não apenas é mais ineficiente devido às sub-rotinas chamadas repetidamente pelo SO, como também é terminantemente interrompida e nula ao exceder a profundidade tolerada para sequências gigantes.</p>
+
+                    <div class="performance-chart">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="lang-en">
+                    <h2>Computational Complexity Analysis</h2>
+                    <p>The Collatz Conjecture defies traditional algorithm analysis. Unlike a binary search or a bounded loop, the Collatz function lacks a closed formula to delimit the exact steps for a given $n$. Any metric on its "stopping time" relies entirely on heuristic estimates and statistical observations of trillions of empirically confirmed orbits.</p>
+
+                    <p>Below we present two classic approaches to evaluating orbits programmatically, demonstrating the advantages and pitfalls of handling chaotic numbers and the nuances of execution flow control in computer memory.</p>
+
+                    <div class="algorithm-grid">
+                        <div class="algorithm-card">
+                            <h3>
+                                <span class="algorithm-badge iterative">Iterative</span>
+                                Standard Loop
+                            </h3>
+                            <div class="code-block">
+<code>function collatzIterative(n) {
+  let steps = 0;
+  while (n !== 1) {
+    if (n % 2 === 0) {
+      n = n / 2;
+    } else {
+      n = 3 * n + 1;
+    }
+    steps++;
+  }
+  return steps;
+}</code>
+                            </div>
+                            <h4 style="color: var(--accent-green);">Advantages:</h4>
+                            <div class="list-item"><strong>Constant Space $\mathcal{O}(1)$:</strong> Uses memory only for the `n` and `steps` variables.</div>
+                            <div class="list-item"><strong>Absolute Stability:</strong> Will never cause a <em>Stack Overflow</em> error, regardless of orbit height.</div>
+                            <div class="list-item"><strong>Higher Raw Speed:</strong> Avoids the overhead associated with repeatedly creating and destroying execution frames in the processor.</div>
+                        </div>
+
+                        <div class="algorithm-card">
+                            <h3>
+                                <span class="algorithm-badge recursive">Recursive</span>
+                                Nested Calls
+                            </h3>
+                            <div class="code-block">
+<code>function collatzRecursive(n, steps = 0) {
+  if (n === 1) return steps;
+  
+  if (n % 2 === 0) {
+    return collatzRecursive(n / 2, steps + 1);
+  } else {
+    return collatzRecursive(3 * n + 1, steps + 1);
+  }
+}</code>
+                            </div>
+                            <h4 style="color: var(--accent-purple);">Disadvantages:</h4>
+                            <div class="list-item"><strong>Linear Space $\mathcal{O}(k)$:</strong> Uses space proportional to the total number of steps ($k$), saving the state for each step in an execution stack "Frame".</div>
+                            <div class="list-item"><strong>Overflow Vulnerability:</strong> If the orbit requires too many steps, the JS engine can exhaust the maximum allowed stack depth and crash your application.</div>
+                        </div>
+                    </div>
+
+                    <h2>Expected Asymptotic Behavior</h2>
+                    <p>Why do we say the average behavior approximates $\mathcal{O}(\log n)$? The secret lies in probability. For a generic even number $n$, the operation halves its value (reduction factor of $0.5$). For an odd number $n$, the $\frac{3n+1}{2}$ operation increases its value (growth of approx. $1.5$ times). In the vastness of integers, the statistical frequency with which even operations occur in succession dominates the explosions of odd operations, resulting in a macro trend of logarithmic decay towards $1$.</p>
+
+                    <div class="complexity-notation">
+                        <div class="complexity-item">
+                            <h4>🔴 Best Case ($\Omega$)</h4>
+                            <p class="description">Theoretical lower bound of the algorithm's execution time.</p>
+                            <div class="formula">$\Omega(\log n)$</div>
+                            <p class="description">Occurs whenever the system receives pure powers of base 2 (e.g., 16, 32, 1024...). The descent is immediate and frictionless.</p>
+                        </div>
+
+                        <div class="complexity-item">
+                            <h4>🟢 Average Case ($\Theta$)</h4>
+                            <p class="description">The probabilistic behavior and "center mass" of stopping times.</p>
+                            <div class="formula">$\Theta(\log n)$</div>
+                            <p class="description">Confirmed through billions of sampled computational points; reflects the probabilistic victory of divisions over multiplications.</p>
+                        </div>
+
+                        <div class="complexity-item">
+                            <h4>🔵 Empirical Worst Case (Observed)</h4>
+                            <p class="description">The upper bound based on what humanity has practically calculated so far.</p>
+                            <div class="formula">$\approx \mathcal{O}(\log n)$*</div>
+                            <p class="description">
+                                <em>*Math note: The Big-O here describes an empirical approximation.</em><br><br>
+                                <strong>The Worst-Case Paradox:</strong> Mathematically, the true Worst Case ($\mathcal{O}$) is strictly <strong>Unknown</strong>. Since there is no absolute proof of the conjecture, theory admits the possibility that the upper bound is infinity (if a number never stops growing).
+                                <br><br>
+                                <strong>In Computational Practice:</strong> The scenario is quite different. Computationally speaking, even numbers that climb violently (outliers) eventually fall into a practical limit. Empirically, the maximum known stopping time for gigantic numbers grows in a staggered manner approximating logarithmic behavior, but inevitably collapses thanks to the exponential power of chained reductions ($2^n$).
+                            </p>
+                        </div>
+                    </div>
+
+                    <h2>Architectural Comparison</h2>
+                    <table class="complexity-table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Iterative Approach (Loop)</th>
+                                <th>Recursive Approach (Call Stack)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Best Case ($\Omega$)</strong></td>
+                                <td>$\Omega(\log n)$</td>
+                                <td>$\Omega(\log n)$</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Average Case ($\Theta$)</strong></td>
+                                <td>$\Theta(\log n)$</td>
+                                <td>$\Theta(\log n)$</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Theoretical Worst Case ($\mathcal{O}$)</strong></td>
+                                <td>Unknown</td>
+                                <td>Unknown</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Space Complexity (Memory)</strong></td>
+                                <td>$\mathcal{O}(1)$ (Constant)</td>
+                                <td>$\mathcal{O}(k)$ (Linear per orbit frame)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Practical Limit (JS Engine)</strong></td>
+                                <td>Infinite (until numeric bytes overflow)</td>
+                                <td>~10,000 calls (Stack Overflow)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Execution Overhead</strong></td>
+                                <td>Very Low (variable reassignment)</td>
+                                <td>High (frame allocation and destruction)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Live Performance Test</h2>
+                    <div class="controls">
+                        <input type="number" id="algoTestInputEn" placeholder="Number to test" value="837799" min="1" max="10000000">
+                        <button class="action-btn" onclick="testAlgorithmsEn()">
+                            Run Stress Test
+                        </button>
+                    </div>
+                    <div class="stats" id="algoTestStatsEn"></div>
+
+                    <h2>Call Stack Visualization (Recursion)</h2>
+                    <p>When running the function recursively, the computer "stacks" isolated execution environments in memory. Look closely at the anatomy of the stack creation for each step of a number's trajectory (try it with very high values to visualize the overhead!):</p>
+                    <div class="controls">
+                        <input type="number" id="stackTestInputEn" placeholder="Number" value="15" min="1" max="10000">
+                        <button class="action-btn" onclick="visualizeStackEn()">
+                            Generate and Visualize Stack
+                        </button>
+                    </div>
+                    <div id="stackVisualizationEn"></div>
+
+                    <h2>Static Performance Curve: Stack Limitation and Overhead</h2>
+                    <p>The chart below displays illustrative simulated average times for massive datasets, demonstrating how the Iterative approach guarantees uniform completions, while the Recursive one is not only more inefficient due to repeated OS subroutine calls but is also abruptly terminated and nulled when exceeding the tolerated depth for giant sequences.</p>
+
+                    <div class="performance-chart">
+                        <canvas id="performanceChartEn"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mathTab" class="tab-content math-section">
+                <div class="lang-pt">
+                    <p>Este documento consolida o raciocínio algébrico e computacional acerca da Conjectura de Collatz (Problema $3n+1$), demonstrando formalmente as barreiras que impedem a sua solução através dos métodos tradicionais de prova.</p>
+
+                    <h2>1. O Comportamento e a Falha dos Métodos Tradicionais</h2>
+                    <p>A conjectura define uma operação iterativa sobre os inteiros positivos:</p>
+                    $$ f(n) = \begin{cases} \frac{n}{2}, & \text{se } n \text{ é par} \\ 3n + 1, & \text{se } n \text{ é ímpar} \end{cases} $$
+                    
+                    <div class="highlight" style="border-left-color: var(--accent-green);">
+                        <strong>A Conjectura Formalizada:</strong> Para todo inteiro positivo $n$, a sequência $f(n), f(f(n)), f(f(f(n))), \dots$ eventualmente atinge o número $1$.
+                    </div>
+                    
+                    <p>Apesar da simplicidade aparente, os pilares fundamentais da demonstração matemática falham diante do seu comportamento caótico:</p>
+                    <ul class="math-list">
+                        <li><strong>Indução Matemática:</strong> Falha porque a etapa ímpar $3n+1$ arremessa o valor para fora do escopo validado. O passo acelerado $\frac{3n+1}{2}$ cresce a uma taxa de aproximadamente $1.5x$, destruindo a premissa de que $n+1$ inevitavelmente cairá abaixo de $n$ no curto prazo.</li>
+                        <li><strong>Prova Direta:</strong> Falha devido à mistura estrutural de operações aditivas e multiplicativas.</li>
+                        <li><strong>Prova por Contradição:</strong> A incapacidade de encontrar amarras algébricas para modelar essas sequências anômalas inviabiliza o absurdo lógico.</li>
+                    </ul>
+
+                    <h2>2. A Equação de Múltiplos Passos e a Constante de Trajetória ($C$)</h2>
+                    <p>Se aplicarmos a função $f(n)$ repetidamente, a expressão algébrica que define o número resultante exato $N_k$ após $k$ iterações (onde as variáveis contam $m$ operações ímpares e $p$ operações pares) assume a seguinte forma:</p>
+                    $$ N_k = \frac{3^m}{2^p}n + C $$
+                    <p>Olhe para o primeiro termo: $\frac{3^m}{2^p}n$. Ele mostra o peso exato das multiplicações por 3 e das divisões por 2 aplicadas ao valor inicial $n$. É a batalha vetorial das duas forças da conjectura.</p>
+                    <div class="highlight">
+                        <strong>Mas o que é o $C$?</strong><br>
+                        Aqui reside o "monstro" de Collatz. O $C$ é a <strong>Constante de Trajetória</strong>. Ele não é um número fixo, mas sim um polinômio fracionário que acumula todos os $+1$ gerados nos passos ímpares, divididos rigorosamente pela sequência de passos pares que vieram em seguida. É o acúmulo de "ruído aditivo" que desvia a órbita do número.
+                    </div>
+
+                    <h2>3. A Dedução Algébrica de Passos Ímpares Consecutivos</h2>
+                    <p>Sabemos deduzir a expressão exata para múltiplos passos ímpares ininterruptos. Para um número de partida par $n$ (logicamente, $n+1$ é ímpar), após $p$ operações aceleradas de $\frac{3x+1}{2}$, a geometria do processo é descrita por:</p>
+                    $$ x_p = \frac{3^p (n+1) + \sum_{i=0}^{p-1} 2^i 3^{p-1-i}}{2^p} $$
+                    <p>Como o somatório se expande de forma elegante para $3^p - 2^p$, a equação simplifica dramaticamente para:</p>
+                    $$ x_p = \frac{3^p(n+2)}{2^p} - 1 $$
+
+                    <h2>4. O Teorema do 1-Ciclo e a Impossibilidade de Loops Simples</h2>
+                    <p>Com essa base, se definirmos $k$ como passos de subida (ímpares) e $m$ como passos de descida (pares), para que um ciclo se feche retornando ao $x$ inicial, temos:</p>
+                    $$ x = \frac{3^k - 2^k}{2^{k+m} - 3^k} $$
+                    <p>Para qualquer ciclo gigante com $k > 1$, a irracionalidade geométrica das bases ($\log_2(3) \approx 1.5849$) destrói a possibilidade do denominador subtraído dividir o numerador de forma inteira e exata (um fato embasado em extensões do Teorema de Baker em números transcendentes).</p>
+                    
+                    <div class="highlight">
+                        Graças à equação que estruturamos e deduzimos, sabemos conclusivamente que a Conjectura de Collatz não esconde nenhum "loop" no infinito composto por apenas uma subida contínua e uma descida contínua. <strong>Se a conjectura falhar em algum número colossal, terá que ser em um ciclo altamente irregular, cheio de ziguezagues caóticos, ou em uma fuga literal para o infinito.</strong>
+                    </div>
+
+                    <h2>5. A Tentativa de Prova via Fatores Primos</h2>
+                    <p>Uma ideia naturalmente poderosa para tentar resolver Collatz é focar na "anatomia" dos números. Pelo <strong>Teorema Fundamental da Aritmética</strong>, todo número natural maior que 1 possui uma assinatura única de fatores primos:</p>
+                    $$ n = 2^a \cdot 3^b \cdot 5^c \cdot 7^d \dots $$
+                    <p>A intuição sugere que usar essa fatoração reduziria a amplitude com a qual lidamos, mapeando a evolução das "peças" em vez dos números brutais. O passo de divisão funciona perfeitamente nesse modelo:</p>
+                    <div class="highlight">
+                        Se $n$ é par ($a > 0$), dividir por 2 é apenas subtrair 1 do expoente do primo base:<br>
+                        $$ \frac{n}{2} = 2^{a-1} \cdot 3^b \cdot 5^c \cdot 7^d \dots $$
+                    </div>
+                    
+                    <h3>O Colapso da Propriedade Multiplicativa</h3>
+                    <p>No entanto, a prova colapsa espetacularmente no passo ímpar ($3n+1$). Aqui nos deparamos com o que na teoria dos números chamamos de <strong>Muralha Aditivo-Multiplicativa</strong>.</p>
+                    <p>Na matemática, dizemos que uma propriedade se transfere dos primos para os compostos se a função que estamos analisando for multiplicativa, ou seja, se $f(a \cdot b) = f(a) \cdot f(b)$. A função de Collatz falha nesse teste.</p>
+                    <p>Vamos testar a hereditariedade com um exemplo prático:</p>
+                    <ul class="math-list">
+                        <li>Pegue o primo <strong>$3$</strong>. A sua órbita atinge o 1: $3 \to 10 \to 5 \to 16 \to 8 \to 4 \to 2 \to 1$.</li>
+                        <li>Pegue o primo <strong>$5$</strong>. A sua órbita atinge o 1: $5 \to 16 \to 8 \to 4 \to 2 \to 1$.</li>
+                    </ul>
+                    <p>Se o comportamento dos compostos fosse herdado, o comportamento de <strong>$15$</strong> ($3 \cdot 5$) deveria ser uma combinação previsível. Mas veja o primeiro passo ímpar:</p>
+                    $$ f(15) = 3(15) + 1 = 46 $$
+                    <p>A fatoração do número $46$ é $2 \cdot 23$. O fator $5$ sumiu. O fator $3$ sumiu. Um primo novo ($23$) apareceu. A órbita do $15$ toma um caminho totalmente caótico que não tem relação com as órbitas dos seus fatores "pais".</p>
+
+                    <h3>A Demonstração Algébrica do Erro</h3>
+                    <p>Se aplicarmos a regra ímpar em um número composto $n = p \cdot q$, temos o trajeto real:</p>
+                    $$ f(p \cdot q) = 3(p \cdot q) + 1 = 3pq + 1 $$
+                    <p>Se tentarmos analisar a regra nos primos separadamente e multiplicar os resultados:</p>
+                    $$ f(p) \cdot f(q) = (3p + 1) \cdot (3q + 1) = 9pq + 3p + 3q + 1 $$
+                    <p>A catástrofe algébrica fica evidente, pois a hereditariedade não se sustenta:</p>
+                    $$ 3pq + 1 \neq 9pq + 3p + 3q + 1 $$
+                    
+                    <div class="highlight">
+                        <strong>O Veredito Final:</strong> Ao realizar a operação $+1$ (aditiva) logo após a operação $3n$ (multiplicativa), o algoritmo destrói a fatoração prima original. A operação reescreve o "DNA multiplicativo" do número a cada passo ímpar.
+                    </div>
+                </div>
+
+                <div class="lang-en">
+                    <p>This document consolidates the algebraic and computational reasoning regarding the Collatz Conjecture ($3n+1$ Problem), formally demonstrating the barriers that prevent its solution through traditional proof methods.</p>
+
+                    <h2>1. The Behavior and Failure of Traditional Methods</h2>
+                    <p>The conjecture defines an iterative operation on positive integers:</p>
+                    $$ f(n) = \begin{cases} \frac{n}{2}, & \text{if } n \text{ is even} \\ 3n + 1, & \text{if } n \text{ is odd} \end{cases} $$
+                    
+                    <div class="highlight" style="border-left-color: var(--accent-green);">
+                        <strong>The Formalized Conjecture:</strong> For every positive integer $n$, the sequence $f(n), f(f(n)), f(f(f(n))), \dots$ eventually reaches the number $1$.
+                    </div>
+                    
+                    <p>Despite its apparent simplicity, the fundamental pillars of mathematical demonstration fail against its chaotic behavior:</p>
+                    <ul class="math-list">
+                        <li><strong>Mathematical Induction:</strong> Fails because the odd step $3n+1$ throws the value out of the validated scope. The accelerated step $\frac{3n+1}{2}$ grows at a rate of roughly $1.5x$, destroying the premise that $n+1$ will inevitably drop below $n$ in the short term.</li>
+                        <li><strong>Direct Proof:</strong> Fails due to the structural mixing of additive and multiplicative operations.</li>
+                        <li><strong>Proof by Contradiction:</strong> The inability to find algebraic bounds to model these anomalous sequences makes a logical absurdity impossible to establish.</li>
+                    </ul>
+
+                    <h2>2. The Multi-Step Equation and Trajectory Constant ($C$)</h2>
+                    <p>If we apply the function $f(n)$ repeatedly, the exact algebraic expression defining the resulting number $N_k$ after $k$ iterations (where variables count $m$ odd operations and $p$ even operations) takes this form:</p>
+                    $$ N_k = \frac{3^m}{2^p}n + C $$
+                    <p>Look at the first term: $\frac{3^m}{2^p}n$. It shows the exact weight of multiplications by 3 and divisions by 2 applied to the starting value $n$. It is the vector battle of the two forces.</p>
+                    <div class="highlight">
+                        <strong>But what is $C$?</strong><br>
+                        Here lies the "monster" of Collatz. $C$ is the <strong>Trajectory Constant</strong>. It is not a fixed number, but a fractional polynomial that accumulates all the $+1$s generated in the odd steps, rigorously divided by the sequence of even steps that followed. It is the accumulation of "additive noise" that deflects the number's orbit.
+                    </div>
+
+                    <h2>3. Algebraic Deduction of Consecutive Odd Steps</h2>
+                    <p>We can deduce the exact expression for multiple uninterrupted odd steps. For an even starting number $n$ (logically, $n+1$ is odd), after $p$ accelerated operations of $\frac{3x+1}{2}$, the geometry is described by:</p>
+                    $$ x_p = \frac{3^p (n+1) + \sum_{i=0}^{p-1} 2^i 3^{p-1-i}}{2^p} $$
+                    <p>Since the summation elegantly expands to $3^p - 2^p$, the equation dramatically simplifies to:</p>
+                    $$ x_p = \frac{3^p(n+2)}{2^p} - 1 $$
+
+                    <h2>4. The 1-Cycle Theorem and Impossibility of Simple Loops</h2>
+                    <p>With this basis, if we define $k$ as steps up (odd) and $m$ as steps down (even), for a cycle to close and return to the initial $x$, we have:</p>
+                    $$ x = \frac{3^k - 2^k}{2^{k+m} - 3^k} $$
+                    <p>For any giant cycle with $k > 1$, the geometric irrationality of the bases ($\log_2(3) \approx 1.5849$) destroys the possibility of the subtracted denominator exactly dividing the numerator (backed by extensions of Baker's Theorem in transcendental numbers).</p>
+                    
+                    <div class="highlight">
+                        Thanks to this equation, we conclusively know that the Collatz Conjecture hides no simple "loop" in infinity composed of just one continuous climb and one continuous descent. <strong>If the conjecture fails at some colossal number, it must be in a highly irregular cycle full of chaotic zigzags, or in a literal escape to infinity.</strong>
+                    </div>
+
+                    <h2>5. The Prime Factorization Proof Attempt</h2>
+                    <p>A naturally powerful idea to resolve Collatz is to focus on the "anatomy" of numbers. By the <strong>Fundamental Theorem of Arithmetic</strong>, every natural number greater than 1 has a unique prime factorization signature:</p>
+                    $$ n = 2^a \cdot 3^b \cdot 5^c \cdot 7^d \dots $$
+                    <p>Intuition suggests that using this would reduce the amplitude, mapping the evolution of "pieces" instead of raw numbers. The division step works perfectly here:</p>
+                    <div class="highlight">
+                        If $n$ is even ($a > 0$), dividing by 2 is just subtracting 1 from the base prime exponent:<br>
+                        $$ \frac{n}{2} = 2^{a-1} \cdot 3^b \cdot 5^c \cdot 7^d \dots $$
+                    </div>
+                    
+                    <h3>The Collapse of the Multiplicative Property</h3>
+                    <p>However, the proof collapses spectacularly on the odd step ($3n+1$). Here we hit what is known in number theory as the <strong>Additive-Multiplicative Wall</strong>.</p>
+                    <p>In math, a property transfers from primes to composites if the function is multiplicative, i.e., $f(a \cdot b) = f(a) \cdot f(b)$. Collatz fails this test.</p>
+                    <p>Let's test heredity with a practical example:</p>
+                    <ul class="math-list">
+                        <li>Take the prime <strong>$3$</strong>. Its orbit reaches 1: $3 \to 10 \to 5 \to 16 \to 8 \to 4 \to 2 \to 1$.</li>
+                        <li>Take the prime <strong>$5$</strong>. Its orbit reaches 1: $5 \to 16 \to 8 \to 4 \to 2 \to 1$.</li>
+                    </ul>
+                    <p>If composite behavior were inherited, the behavior of <strong>$15$</strong> ($3 \cdot 5$) should be predictable. But look at the first odd step:</p>
+                    $$ f(15) = 3(15) + 1 = 46 $$
+                    <p>The factorization of $46$ is $2 \cdot 23$. Factor $5$ is gone. Factor $3$ is gone. A brand new prime ($23$) appeared. The orbit of $15$ takes an entirely chaotic path completely unrelated to its "parent" factors.</p>
+
+                    <h3>The Algebraic Demonstration of the Error</h3>
+                    <p>If we apply the odd rule to a composite number $n = p \cdot q$, the real path is:</p>
+                    $$ f(p \cdot q) = 3(p \cdot q) + 1 = 3pq + 1 $$
+                    <p>If we try to analyze the rule on the primes separately and multiply the results:</p>
+                    $$ f(p) \cdot f(q) = (3p + 1) \cdot (3q + 1) = 9pq + 3p + 3q + 1 $$
+                    <p>The algebraic catastrophe is evident; heredity is not sustained:</p>
+                    $$ 3pq + 1 \neq 9pq + 3p + 3q + 1 $$
+                    
+                    <div class="highlight">
+                        <strong>The Final Verdict:</strong> By performing the $+1$ (additive) operation right after the $3n$ (multiplicative) operation, the algorithm destroys the original prime factorization. The operation rewrites the number's "multiplicative DNA" at every odd step.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/Jluckmay/" target="_blank" rel="noopener noreferrer">
+                    <span class="lang-pt">GitHub</span><span class="lang-en">GitHub</span>
+                </a>
+            </div>
+            <div class="footer-copyright">
+                <span class="lang-pt">© 2026 Laboratório da Conjectura de Collatz. Todos os direitos reservados.</span>
+                <span class="lang-en">© 2026 Collatz Conjecture Laboratory. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // i18n Dictionary for Charts
+        const i18n = {
+            pt: {
+                orbitLabel: "Órbita de n = ",
+                stepsX: "Passos (Tempo)",
+                valueY: "Valor (n)",
+                stopTimeLabel: "Tempo de Parada",
+                startNX: "Número Inicial (n)",
+                totalStepsY: "Total de Passos",
+                oddTrans: "Transição Ímpar (3n+1)",
+                evenTrans: "Transição Par (n/2)",
+                trivialCycle: "Ciclo Trivial 4-2-1",
+                currValX: "Valor Atual (n_i)",
+                nextValY: "Próximo Valor (n_i+1)",
+                forceDiv: "Combo de Divisões (2^n)",
+                forceMult: "Multiplicação (3n + 1)",
+                forceCombined: "Passo Acelerado [(3n+1)/2]",
+                forceSingleDiv: "Divisão Única (n/2)",
+                valNX: "Valor de n",
+                resultY: "Resultado da Função (Escala Log)",
+                invalidNum: "Número inválido.",
+                themeLight: "☀️ Claro",
+                themeDark: "🌙 Escuro",
+                iterativeTime: "Iterativo Simulado (ms)",
+                recursiveTime: "Recursivo Simulado (ms)",
+                stackDepth: "Profundidade da Pilha",
+                callStack: "Pilha de Chamadas de Execução"
+            },
+            en: {
+                orbitLabel: "Orbit of n = ",
+                stepsX: "Steps (Time)",
+                valueY: "Value (n)",
+                stopTimeLabel: "Stopping Time",
+                startNX: "Starting Number (n)",
+                totalStepsY: "Total Steps",
+                oddTrans: "Odd Transition (3n+1)",
+                evenTrans: "Even Transition (n/2)",
+                trivialCycle: "Trivial Cycle 4-2-1",
+                currValX: "Current Value (n_i)",
+                nextValY: "Next Value (n_i+1)",
+                forceDiv: "Division Combo (2^n)",
+                forceMult: "Multiplication (3n + 1)",
+                forceCombined: "Accelerated Step [(3n+1)/2]",
+                forceSingleDiv: "Single Division (n/2)",
+                valNX: "Value of n",
+                resultY: "Function Result (Log Scale)",
+                invalidNum: "Invalid number.",
+                themeLight: "☀️ Light",
+                themeDark: "🌙 Dark",
+                iterativeTime: "Simulated Iterative (ms)",
+                recursiveTime: "Simulated Recursive (ms)",
+                stackDepth: "Stack Depth",
+                callStack: "Execution Call Stack"
+            }
+        };
+
+        function getLang() {
+            return document.documentElement.getAttribute('data-lang') || 'pt';
+        }
+
+        function t(key) {
+            return i18n[getLang()][key];
+        }
+
+        function getCSSVar(name) {
+            return getComputedStyle(document.body).getPropertyValue(name).trim();
+        }
+
+        let collatzChartInstance = null;
+        let stoppingTimesChartInstance = null;
+        let phaseSpaceChartInstance = null;
+        let compareChartInstance = null;
+        let performanceChartInstancePt = null;
+        let performanceChartInstanceEn = null;
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            
+            const btn = document.getElementById('themeToggle');
+            btn.innerHTML = newTheme === 'dark' ? 
+                `☀️ <span class="lang-pt">Claro</span><span class="lang-en">Light</span>` : 
+                `🌙 <span class="lang-pt">Escuro</span><span class="lang-en">Dark</span>`;
+            
+            setTimeout(reRenderCurrentChart, 50);
+        }
+
+        function toggleLang() {
+            const html = document.documentElement;
+            const currentLang = html.getAttribute('data-lang') || 'pt';
+            const newLang = currentLang === 'pt' ? 'en' : 'pt';
+            html.setAttribute('data-lang', newLang);
+            
+            document.getElementById('langToggle').innerText = newLang === 'pt' ? '🌐 EN' : '🌐 PT';
+            reRenderCurrentChart();
+        }
+
+        function openTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+
+            if(tabId === 'visTab' && !collatzChartInstance) plotCollatz();
+            if(tabId === 'stopTab' && !stoppingTimesChartInstance) plotStoppingTimes();
+            if(tabId === 'mapTab' && !phaseSpaceChartInstance) plotPhaseSpace();
+            if(tabId === 'compareTab' && !compareChartInstance) plotComparison();
+            if(tabId === 'algoTab') {
+                plotPerformanceComparison('performanceChart', performanceChartInstancePt, pt => performanceChartInstancePt = pt);
+                plotPerformanceComparison('performanceChartEn', performanceChartInstanceEn, pt => performanceChartInstanceEn = pt);
+            }
+        }
+
+        function reRenderCurrentChart() {
+            if(document.getElementById('visTab').classList.contains('active') && collatzChartInstance) plotCollatz();
+            if(document.getElementById('stopTab').classList.contains('active') && stoppingTimesChartInstance) plotStoppingTimes();
+            if(document.getElementById('mapTab').classList.contains('active') && phaseSpaceChartInstance) plotPhaseSpace();
+            if(document.getElementById('compareTab').classList.contains('active') && compareChartInstance) plotComparison();
+            if(document.getElementById('algoTab').classList.contains('active')) {
+                plotPerformanceComparison('performanceChart', performanceChartInstancePt, pt => performanceChartInstancePt = pt);
+                plotPerformanceComparison('performanceChartEn', performanceChartInstanceEn, pt => performanceChartInstanceEn = pt);
+            }
+        }
+
+        function generateSequence(n) {
+            let sequence = [n];
+            let current = n;
+            let count = 0;
+            while (current !== 1 && count < 100000) {
+                if (current % 2 === 0) current = current / 2;
+                else current = (3 * current) + 1;
+                sequence.push(current);
+                count++;
+            }
+            return sequence;
+        }
+
+        function getStoppingTime(n) {
+            let count = 0;
+            while (n !== 1) {
+                if (n % 2 === 0) n = n / 2;
+                else n = (3 * n) + 1;
+                count++;
+                if(count > 100000) return 100000;
+            }
+            return count;
+        }
+
+        function collatzIterative(n) {
+            let steps = 0;
+            while (n !== 1) {
+                if (n % 2 === 0) n = n / 2;
+                else n = 3 * n + 1;
+                steps++;
+            }
+            return steps;
+        }
+
+        function collatzRecursive(n, steps = 0) {
+            if (n === 1) return steps;
+            if (n % 2 === 0) return collatzRecursive(n / 2, steps + 1);
+            else return collatzRecursive(3 * n + 1, steps + 1);
+        }
+
+        function collatzRecursiveWithStack(n, steps = 0, stack = []) {
+            const isEven = n % 2 === 0;
+            const nextN = isEven ? n / 2 : 3 * n + 1;
+            const operation = isEven ? `n ÷ 2 = ${nextN}` : `3n + 1 = 3 × ${n} + 1 = ${nextN}`;
+            
+            stack.push({ 
+                n, 
+                steps, 
+                operation: n === 1 ? 'Base case (n = 1)' : operation,
+                isEven
+            });
+            
+            if (n === 1) {
+                return { steps, stack };
+            }
+            
+            return collatzRecursiveWithStack(nextN, steps + 1, stack);
+        }
+
+        function plotCollatz() {
+            const seed = parseInt(document.getElementById('seedInput').value);
+            if (isNaN(seed) || seed < 1) return alert(t('invalidNum'));
+
+            const dataPoints = generateSequence(seed);
+            const labels = Array.from({length: dataPoints.length}, (_, i) => i);
+            
+            document.getElementById('statSteps').innerText = dataPoints.length - 1;
+            document.getElementById('statMax').innerText = Math.max(...dataPoints);
+
+            const ctx = document.getElementById('collatzChart').getContext('2d');
+            if (collatzChartInstance) collatzChartInstance.destroy();
+
+            const textColor = getCSSVar('--chart-text');
+            const gridColor = getCSSVar('--chart-grid');
+            const accent = getCSSVar('--accent-color');
+
+            collatzChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${t('orbitLabel')}${seed}`,
+                        data: dataPoints,
+                        borderColor: accent,
+                        backgroundColor: getLang() === 'dark' ? 'rgba(88, 166, 255, 0.1)' : 'rgba(9, 105, 218, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 2,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: t('stepsX'), color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { title: { display: true, text: t('valueY'), color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } }
+                    },
+                    plugins: { legend: { labels: { color: textColor } } }
+                }
+            });
+        }
+
+        function plotStoppingTimes() {
+            const maxN = parseInt(document.getElementById('maxNInput').value);
+            const scatterData = [];
+            for (let i = 1; i <= maxN; i++) {
+                scatterData.push({ x: i, y: getStoppingTime(i) });
+            }
+
+            const ctx = document.getElementById('stoppingTimesChart').getContext('2d');
+            if (stoppingTimesChartInstance) stoppingTimesChartInstance.destroy();
+
+            const textColor = getCSSVar('--chart-text');
+            const gridColor = getCSSVar('--chart-grid');
+            const accentPurple = getCSSVar('--accent-purple');
+
+            stoppingTimesChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: t('stopTimeLabel'),
+                        data: scatterData,
+                        backgroundColor: accentPurple,
+                        pointRadius: 1.5,
+                        pointHoverRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false, parsing: false, normalized: true,
+                    scales: {
+                        x: { type: 'linear', title: { display: true, text: t('startNX'), color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { title: { display: true, text: t('totalStepsY'), color: textColor }, ticks: { color: textColor }, grid: { color: gridColor } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function plotPhaseSpace() {
+            const exponent = parseInt(document.getElementById('mapRangeInput').value);
+            const limitN = Math.pow(10, exponent);
+            
+            const oddTransitions = [];
+            const evenTransitions = [];
+            const step = Math.max(1, Math.floor(limitN / 10000));
+
+            for (let i = 1; i <= limitN; i += step) {
+                if (i % 2 === 0) evenTransitions.push({ x: i, y: i / 2 });
+                else oddTransitions.push({ x: i, y: (3 * i) + 1 });
+            }
+
+            const cyclePoints = [{x: 4, y: 2}, {x: 2, y: 1}, {x: 1, y: 4}];
+            const ctx = document.getElementById('phaseSpaceChart').getContext('2d');
+            if (phaseSpaceChartInstance) phaseSpaceChartInstance.destroy();
+
+            const textColor = getCSSVar('--chart-text');
+            const gridColor = getCSSVar('--chart-grid');
+            const colorRed = getCSSVar('--accent-red');
+            const colorGreen = getCSSVar('--accent-green');
+            const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+
+            phaseSpaceChartInstance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        { label: t('oddTrans'), data: oddTransitions, backgroundColor: colorRed, pointRadius: 1.5 },
+                        { label: t('evenTrans'), data: evenTransitions, backgroundColor: colorGreen, pointRadius: 1.5 },
+                        { label: t('trivialCycle'), data: cyclePoints, backgroundColor: theme==='dark'?'#fff':'#000', borderWidth: 2, pointRadius: 5, showLine: true, tension: 0.3, borderColor: theme==='dark'?'#fff':'#000', fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false, parsing: false, normalized: true,
+                    scales: {
+                        x: { type: 'logarithmic', title: { display: true, text: t('currValX'), color: textColor }, ticks: { color: textColor }, grid: { color: gridColor }, min: 1 },
+                        y: { type: 'logarithmic', title: { display: true, text: t('nextValY'), color: textColor }, ticks: { color: textColor }, grid: { color: gridColor }, min: 1 }
+                    },
+                    plugins: { legend: { labels: { color: textColor } } }
+                }
+            });
+        }
+
+        function plotComparison() {
+            let maxN = parseInt(document.getElementById('compareNInput').value);
+            if (isNaN(maxN) || maxN < 1) return alert(t('invalidNum'));
+            if (maxN > 1024) maxN = 1024;
+
+            const labels = [];
+            const pow2Data = [];
+            const linearData = [];
+            const combinedData = [];
+            const singleDivData = [];
+
+            for (let n = 1; n <= maxN; n++) {
+                labels.push(n);
+                pow2Data.push(Math.pow(2, n));
+                linearData.push((3 * n) + 1);
+                combinedData.push(((3 * n) + 1) / 2);
+                singleDivData.push(n / 2);
+            }
+
+            const ctx = document.getElementById('compareChart').getContext('2d');
+            if (compareChartInstance) compareChartInstance.destroy();
+
+            const textColor = getCSSVar('--chart-text');
+            const gridColor = getCSSVar('--chart-grid');
+            const colorYellow = getCSSVar('--accent-yellow');
+            const colorRed = getCSSVar('--accent-red');
+            const colorPurple = getCSSVar('--accent-purple');
+            const colorBlue = getCSSVar('--accent-blue');
+
+            compareChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { 
+                            label: t('forceDiv'), 
+                            data: pow2Data, 
+                            borderColor: colorYellow, 
+                            backgroundColor: 'transparent', 
+                            borderWidth: 2.5, 
+                            pointRadius: 0, 
+                            fill: false, 
+                            tension: 0.1 
+                        },
+                        { 
+                            label: t('forceMult'), 
+                            data: linearData, 
+                            borderColor: colorRed, 
+                            backgroundColor: 'transparent', 
+                            borderWidth: 2, 
+                            pointRadius: 0, 
+                            fill: false, 
+                            tension: 0.1 
+                        },
+                        { 
+                            label: t('forceCombined'), 
+                            data: combinedData, 
+                            borderColor: colorPurple, 
+                            backgroundColor: 'transparent', 
+                            borderWidth: 2, 
+                            borderDash: [5, 5], 
+                            pointRadius: 0, 
+                            fill: false, 
+                            tension: 0.1 
+                        },
+                        { 
+                            label: t('forceSingleDiv'), 
+                            data: singleDivData, 
+                            borderColor: colorBlue, 
+                            backgroundColor: 'transparent', 
+                            borderWidth: 2, 
+                            borderDash: [2, 4], 
+                            pointRadius: 0, 
+                            fill: false, 
+                            tension: 0.1 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            title: { display: true, text: t('valNX'), color: textColor }, 
+                            ticks: { color: textColor }, 
+                            grid: { color: gridColor } 
+                        },
+                        y: {
+                            type: 'logarithmic',
+                            title: { display: true, text: t('resultY'), color: textColor },
+                            ticks: { 
+                                color: textColor, 
+                                callback: function(value) { return "10^" + Math.log10(value).toFixed(1); } 
+                            },
+                            grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: textColor } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let val = context.raw;
+                                    if (val > 1000000) return `${context.dataset.label}: ${val.toExponential(2)}`;
+                                    return `${context.dataset.label}: ${val}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function plotPerformanceComparison(canvasId, instanceObj, setterFunc) {
+            // Valores Fixados para demonstrar o limite e quebra na recursividade
+            const testLabels = ['100', '1.000', '5.000', '10.000', '50.000', '100.000', '500.000'];
+            const iterativeTimes = [0.001, 0.005, 0.025, 0.05, 0.28, 0.55, 3.2];
+            const recursiveTimes = [0.003, 0.018, 0.105, 0.22, null, null, null]; // Null = Stack Overflow Error
+
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return;
+
+            if (instanceObj) instanceObj.destroy();
+
+            const textColor = getCSSVar('--chart-text');
+            const gridColor = getCSSVar('--chart-grid');
+            const colorGreen = getCSSVar('--accent-green');
+            const colorPurple = getCSSVar('--accent-purple');
+
+            const newChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: testLabels,
+                    datasets: [
+                        {
+                            label: t('iterativeTime'),
+                            data: iterativeTimes,
+                            borderColor: colorGreen,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: colorGreen,
+                            fill: false,
+                            tension: 0.3
+                        },
+                        {
+                            label: t('recursiveTime'),
+                            data: recursiveTimes,
+                            borderColor: colorPurple,
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            pointBackgroundColor: colorPurple,
+                            fill: false,
+                            tension: 0.3,
+                            spanGaps: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Complexidade do Limite Superior (n)', color: textColor },
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            title: { display: true, text: 'Custo Computacional / Tempo Fictício (ms)', color: textColor },
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: textColor } }
+                    }
+                }
+            });
+            setterFunc(newChart);
+        }
+
+        function testAlgorithmsBase(inputId, outputId) {
+            let n = parseInt(document.getElementById(inputId).value);
+            if (isNaN(n) || n < 1) return alert(t('invalidNum'));
+
+            const start1 = performance.now();
+            const stepsIter = collatzIterative(n);
+            const time1 = performance.now() - start1;
+
+            let stepsRec = null;
+            let time2 = null;
+            try {
+                const start2 = performance.now();
+                stepsRec = collatzRecursive(n);
+                time2 = performance.now() - start2;
+            } catch (e) {
+                stepsRec = "Stack Overflow";
+                time2 = "Falha de Memória";
+            }
+
+            document.getElementById(outputId).innerHTML = `
+                <div class="stat-box">
+                    <div class="stat-label">N Testado</div>
+                    <div class="stat-value">${n}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Iterativo (Tempo)</div>
+                    <div class="stat-value">${time1.toFixed(4)} ms</div>
+                </div>
+                <div class="stat-box" style="${typeof time2 === 'string' ? 'border-color: var(--accent-red);' : ''}">
+                    <div class="stat-label">Recursivo (Tempo)</div>
+                    <div class="stat-value" style="${typeof time2 === 'string' ? 'color: var(--accent-red); font-size: 18px;' : ''}">${typeof time2 === 'number' ? time2.toFixed(4) + ' ms' : time2}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Passos Registrados</div>
+                    <div class="stat-value">${stepsIter}</div>
+                </div>
+            `;
+        }
+
+        function testAlgorithms() { testAlgorithmsBase('algoTestInput', 'algoTestStats'); }
+        function testAlgorithmsEn() { testAlgorithmsBase('algoTestInputEn', 'algoTestStatsEn'); }
+
+        function visualizeStackBase(inputId, outputId) {
+            let n = parseInt(document.getElementById(inputId).value);
+            if (isNaN(n) || n < 1) return alert(t('invalidNum'));
+            if (n > 10000) return alert('Número muito grande para visualização segura da pilha! O limite seguro para renderizar o DOM é em torno de N=10000 para evitar travamento da aba. / Number too big. Max 10000');
+
+            try {
+                const result = collatzRecursiveWithStack(n);
+                const stack = result.stack;
+                
+                let html = `<div class="stack-visualization">
+                    <div class="stack-title">📚 ${t('callStack')} - ${t('stackDepth')}: ${stack.length}</div>
+                    <div class="execution-info">
+                        <div class="execution-info-item">
+                            <div class="execution-info-label">Seed Inicial</div>
+                            <div class="execution-info-value">${n}</div>
+                        </div>
+                        <div class="execution-info-item">
+                            <div class="execution-info-label">Passos Total</div>
+                            <div class="execution-info-value">${result.steps}</div>
+                        </div>
+                        <div class="execution-info-item">
+                            <div class="execution-info-label">Profundidade Máxima</div>
+                            <div class="execution-info-value">${stack.length}</div>
+                        </div>
+                    </div>
+                    <div class="stack-container">`;
+                
+                stack.forEach((frame, idx) => {
+                    const isLast = idx === stack.length - 1;
+                    html += `<div class="stack-frame ${isLast ? 'current' : 'completed'}">
+                        <div class="stack-frame-header">Frame [${stack.length - idx}]</div>
+                        <div class="stack-frame-content"><strong>n:</strong> ${frame.n}</div>
+                        <div class="stack-frame-content"><strong>steps:</strong> ${frame.steps}</div>
+                        <div class="stack-frame-content"><strong>op:</strong> ${frame.operation}</div>
+                    </div>`;
+                });
+                
+                html += `</div></div>`;
+                document.getElementById(outputId).innerHTML = html;
+            } catch (e) {
+                document.getElementById(outputId).innerHTML = `
+                    <div class="highlight" style="border-left-color: var(--accent-red);">
+                        <strong>❌ Stack Overflow (Estouro da Pilha):</strong> O número ${n} gerou uma sequência longa que excedeu a capacidade de visualização da pilha.
+                    </div>
+                `;
+            }
+        }
+
+        function visualizeStack() { visualizeStackBase('stackTestInput', 'stackVisualization'); }
+        function visualizeStackEn() { visualizeStackBase('stackTestInputEn', 'stackVisualizationEn'); }
+
+    </script>
+</body>
+</html>
