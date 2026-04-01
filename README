@@ -10,13 +10,13 @@ Um ambiente computacional interativo projetado para explorar, visualizar e docum
 
 ### 🎯 Sobre o Projeto
 
-A Conjectura de Collatz propõe que, ao aplicar uma regra simples a qualquer número inteiro positivo, a sequência inevitavelmente alcançará o ciclo trivial $4 \to 2 \to 1$.
+A Conjectura de Collatz propõe que, ao aplicar uma regra simples a qualquer número inteiro positivo, a sequência inev চমৎকার alcançará o ciclo trivial $4 \to 2 \to 1$.
 
 * **A Regra:** Se o número for par, dividir por $2$; caso seja ímpar, multiplicar por $3$ e somar $1$, ou seja:
 
-$$
-f(n) = \begin{cases} \frac{n}{2}, & \text{se } n \text{ é par} \\ 3n + 1, & \text{se } n \text{ é ímpar} \end{cases}
-$$
+  $$
+  f(n) = \begin{cases} \frac{n}{2}, & \text{se } n \text{ é par} \\\\ 3n + 1, & \text{se } n \text{ é ímpar} \end{cases}
+  $$
 
 > **💡 Curiosidade Computacional:** Até o momento, projetos de supercomputação já testaram e confirmaram a conjectura para todos os números inteiros até $2^{68}$ (aproximadamente $2,95 \times 10^{20}$, ou 295 quintilhões). Nenhum contraexemplo foi encontrado nessa vasta imensidão de números, todos eles eventualmente retornam para $1$!
 
@@ -59,9 +59,9 @@ The Collatz Conjecture proposes that by applying a simple rule to any positive i
 
 * **The Rule:** If the number is even, divide it by $2$; if it is odd, multiply it by $3$ and add $1$:
 
-$$
-f(n) = \begin{cases} \frac{n}{2}, & \text{if } n \text{ is even} \\ 3n + 1, & \text{if } n \text{ is odd} \end{cases}
-$$
+  $$
+  f(n) = \begin{cases} \frac{n}{2}, & \text{if } n \text{ is even} \\\\ 3n + 1, & \text{if } n \text{ is odd} \end{cases}
+  $$
 
 > **💡 Computational Curiosity:** To date, supercomputing projects have tested and verified the conjecture for all integers up to $2^{68}$ (approximately $2.95 \times 10^{20}$, or 295 quintillion). Not a single counterexample has been found in this vast ocean of numbers; they all eventually drop back to $1$!
 
