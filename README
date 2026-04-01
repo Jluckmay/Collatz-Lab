@@ -13,7 +13,10 @@ Um ambiente computacional interativo projetado para explorar, visualizar e docum
 A Conjectura de Collatz propõe que, ao aplicar uma regra simples a qualquer número inteiro positivo, a sequência inevitavelmente alcançará o ciclo trivial $4 \to 2 \to 1$.
 
 * **A Regra:** Se o número for par, dividir por $2$; caso seja ímpar, multiplicar por $3$ e somar $1$, ou seja:
-    $$f(n) = \begin{cases} \frac{n}{2}, & \text{se } n \text{ é par} \\ 3n + 1, & \text{se } n \text{ é ímpar} \end{cases}$$
+
+$$
+f(n) = \begin{cases} \frac{n}{2}, & \text{se } n \text{ é par} \\ 3n + 1, & \text{se } n \text{ é ímpar} \end{cases}
+$$
 
 > **💡 Curiosidade Computacional:** Até o momento, projetos de supercomputação já testaram e confirmaram a conjectura para todos os números inteiros até $2^{68}$ (aproximadamente $2,95 \times 10^{20}$, ou 295 quintilhões). Nenhum contraexemplo foi encontrado nessa vasta imensidão de números, todos eles eventualmente retornam para $1$!
 
@@ -41,8 +44,8 @@ Apesar de sua formulação elementar, a prova matemática formal desta conjectur
 Acesse online: [https://jluckmay.github.io/collatz-lab](https://jluckmay.github.io/collatz-lab)
 
 Para rodar localmente (*zero-setup*):
-1.  Clone o repositório: `git clone https://github.com/jluckmay/collatz-lab.git`
-2.  Abra o arquivo `collatz.html` em seu navegador moderno de preferência.
+1. Clone o repositório: `git clone https://github.com/jluckmay/collatz-lab.git`
+2. Abra o arquivo `collatz.html` em seu navegador moderno de preferência.
 
 ---
 
@@ -55,7 +58,10 @@ An interactive computational environment designed to explore, visualize, and doc
 The Collatz Conjecture proposes that by applying a simple rule to any positive integer, the sequence will inevitably reach the trivial cycle $4 \to 2 \to 1$.
 
 * **The Rule:** If the number is even, divide it by $2$; if it is odd, multiply it by $3$ and add $1$:
-    $$f(n) = \begin{cases} \frac{n}{2}, & \text{if } n \text{ is even} \\ 3n + 1, & \text{if } n \text{ is odd} \end{cases}$$
+
+$$
+f(n) = \begin{cases} \frac{n}{2}, & \text{if } n \text{ is even} \\ 3n + 1, & \text{if } n \text{ is odd} \end{cases}
+$$
 
 > **💡 Computational Curiosity:** To date, supercomputing projects have tested and verified the conjecture for all integers up to $2^{68}$ (approximately $2.95 \times 10^{20}$, or 295 quintillion). Not a single counterexample has been found in this vast ocean of numbers; they all eventually drop back to $1$!
 
@@ -83,8 +89,8 @@ Despite its elementary formulation, a formal mathematical proof has eluded the w
 Live Demo: [https://jluckmay.github.io/collatz-lab](https://jluckmay.github.io/collatz-lab)
 
 To run locally (*zero-setup*):
-1.  Clone the repository: `git clone https://github.com/jluckmay/collatz-lab.git`
-2.  Double-click `collatz.html` to open it in any modern browser.
+1. Clone the repository: `git clone https://github.com/jluckmay/collatz-lab.git`
+2. Double-click `collatz.html` to open it in any modern browser.
 
 ---
 
