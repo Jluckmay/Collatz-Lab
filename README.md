@@ -43,7 +43,7 @@ Apesar de sua formulação elementar, a prova matemática formal desta conjectur
 
 ### 🚀 Como Acessar e Executar
 
-Acesse online: [https://jluckmay.github.io/Collatz-Lab/](https://jluckmay.github.io/Collatz-Lab/))
+Acesse online: [https://jluckmay.github.io/Collatz-Lab/](https://jluckmay.github.io/Collatz-Lab/)
 
 Para rodar localmente (*zero-setup*):
 1. Clone o repositório: `git clone https://github.com/jluckmay/collatz-lab.git`
